@@ -1,5 +1,7 @@
 # High-Performance Motorsport Powertrain (Control) Modelling
 
+*Project Start Date: May 2023*
+
 Welcome to my High-Performance Motorsport Powertrain Modelling repository! This project aims to develop representations and models for high-performance motorsport powertrains, focusing on Formula 1 and British Touring Car (BTCC) hybrid engine modelling. The project utilises Python, Capella, MATLAB, and Simulink for modelling and simulation.
 
 ## Features
