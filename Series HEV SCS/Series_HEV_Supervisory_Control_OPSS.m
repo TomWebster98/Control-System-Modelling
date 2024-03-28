@@ -90,7 +90,12 @@ for i = 1:length(Psignal)
 
 end
 
+% Remove extra SOC value
 SOC(end) = [];
+
+% Calculate Power Share Factor u
+
+u = P_PS ./ Psignal; % Ratio of power demand delivered by ICE.
 
 %% Plot Results
 
@@ -98,6 +103,7 @@ iterations = 1:length(Psignal);
 
 figure(1)
 plot(iterations,SOC)
+grid on
 title('State of Charge')
 xlabel('Time Step')
 ylabel('Battery % Charge')
@@ -108,9 +114,20 @@ hold on
 plot(iterations,P_PS)
 plot(iterations,P_SS)
 yline(P_psOpt,"k:")
+yline(0,"k--")
 hold off
 title('Power Delivery')
 xlabel('Time Step')
 ylabel('Power (kW)')
 legend('Demand', 'ICE Delivery', 'Battery Delivery')
+
+figure(3)
+plot(iterations,u)
+hold on
+yline(1,"k:")
+hold off
+grid on
+title('Ratio of Power Demand Delivered by ICE')
+xlabel('Time Step')
+ylabel('Power Share Factor u')
 
