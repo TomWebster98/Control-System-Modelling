@@ -6,7 +6,7 @@
 
 P_psMax = 100;  % kW
 P_psMin = 5;   % kW
-P_psOpt = 35;   % kW
+P_psOpt = 100;   % kW
 
 %% Define Battery/Motor Parameters
 
@@ -19,7 +19,7 @@ SOC_initial = 0.5;
 
 GenCon_Efficiency = 0.4; % Ratio of generator output into battery charge
 
-BatWght = 200; % kg
+BatWght = 250; % kg
 BatEnrgyDensity = 160; % Wh/kg
 BatCapacity = BatWght * BatEnrgyDensity; %Wh
 BatCapacity_kWs = (BatCapacity*60*60)/1000;      %kWs
@@ -55,6 +55,9 @@ timePerStep = 100; % seconds between each Psignal input val
 
 % Loop over Psignal and Calculate Power Split
 for i = 1:length(Psignal)
+    if SOC(i) >= 1
+        SOC(i) = 1;
+    end
     if SOC(i) <= SOCl 
         if Psignal(i) > P_psMax
             P_PS(i) = P_psMax;
