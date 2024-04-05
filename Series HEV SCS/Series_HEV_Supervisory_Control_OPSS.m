@@ -4,13 +4,13 @@
 
 %% Define ICE Parameters
 
-P_psMax = 100;  % kW
+P_psMax = 170;  % kW
 P_psMin = 5;   % kW
-P_psOpt = 100;   % kW
+P_psOpt = 170;   % kW
 
 %% Define Battery/Motor Parameters
 
-P_ssMax = 40; % kW
+P_ssMax = 288; % kW
 
 SOCu = 0.85;  % Upper SOC Limit
 SOCl = 0.45;  % Lower SOC Limit
@@ -19,9 +19,9 @@ SOC_initial = 0.5;
 
 GenCon_Efficiency = 0.4; % Ratio of generator output into battery charge
 
-BatWght = 250; % kg
-BatEnrgyDensity = 160; % Wh/kg
-BatCapacity = BatWght * BatEnrgyDensity; %Wh
+% BatWght = 250; % kg
+% BatEnrgyDensity = 160; % Wh/kg
+BatCapacity = 52000; %BatWght * BatEnrgyDensity; %Wh
 BatCapacity_kWs = (BatCapacity*60*60)/1000;      %kWs
 
 %% OPSS Control Strategy
@@ -41,7 +41,7 @@ while nnz(Pdemand) ~= length(Pdemand)
         end
     end
 end
-Psignal = Pdemand .* (P_ssMax + P_psMax); % Power Demand kW
+Psignal = Pdemand .* (P_ssMax); % Power Demand kW
 
 % Initialise SOC and Power Output Arrays
 SOC = [SOC_initial,zeros(1,length(Psignal)-1)];
@@ -57,6 +57,8 @@ timePerStep = 100; % seconds between each Psignal input val
 for i = 1:length(Psignal)
     if SOC(i) >= 1
         SOC(i) = 1;
+    elseif SOC(i) <= 0
+        SOC(i) = 0;
     end
     if SOC(i) <= SOCl 
         if Psignal(i) > P_psMax
@@ -97,7 +99,6 @@ end
 SOC(end) = [];
 
 % Calculate Power Share Factor u
-
 u = P_PS ./ Psignal; % Ratio of power demand delivered by ICE.
 
 %% Plot Results
@@ -105,7 +106,7 @@ u = P_PS ./ Psignal; % Ratio of power demand delivered by ICE.
 iterations = 1:length(Psignal);
 
 figure(1)
-plot(iterations,SOC)
+plot(iterations,SOC.*100)
 grid on
 title('State of Charge')
 xlabel('Time Step')
