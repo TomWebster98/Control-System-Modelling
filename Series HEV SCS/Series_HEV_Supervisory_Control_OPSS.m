@@ -60,35 +60,18 @@ for i = 1:length(Psignal)
     elseif SOC(i) <= 0
         SOC(i) = 0;
     end
-    if SOC(i) <= SOCl 
-        if Psignal(i) > P_psMax
-            P_PS(i) = P_psMax;
-        elseif Psignal(i) < P_psOpt
-            P_PS(i) = P_psOpt;
-            P_SS(i) = Psignal(i) - P_PS(i);
-        else
-            P_PS(i) = Psignal(i);
-            P_SS(i) = 0;
-        end
+    if SOC(i) <= SOCl
+        P_PS(i) = P_psOpt;
+        P_SS(i) = Psignal(i);
     elseif SOC(i) > SOCl && SOC(i) < SOCu
-        if Psignal(i) > P_psMin && Psignal(i) < P_ssMax + P_psOpt
-            P_PS(i) = P_psOpt;
-            P_SS(i) = Psignal(i) - P_PS(i);
-        elseif Psignal(i) > P_ssMax + P_psOpt
-            P_SS(i) = P_ssMax;
-            P_PS(i) = Psignal(i) - P_SS(i);
-        end
+        P_PS(i) = P_psOpt;
+        P_SS(i) = Psignal(i);
     elseif SOC(i) >= SOCu
-        if Psignal(i) > P_ssMax
-            P_SS(i) = P_ssMax;
-            P_PS(i) = Psignal(i) - P_SS(i);
-        else
-            P_PS(i) = P_psOpt;
-            P_SS(i) = Psignal(i) - P_PS(i);
-        end
+        P_PS(i) = 0;
+        P_SS(i) = Psignal(i);
     end    
-    if P_SS(i) <= 0
-        SOC(i+1) = SOC(i) + (-1*(P_SS(i) * GenCon_Efficiency)*timePerStep)/BatCapacity_kWs;
+    if P_SS(i) - P_PS(i) <= 0
+        SOC(i+1) = SOC(i) + (-1*((P_SS(i)-P_PS(i)) * GenCon_Efficiency)*timePerStep)/BatCapacity_kWs;
     else
         SOC(i+1) = SOC(i) - (0.1*P_SS(i)*timePerStep)/BatCapacity_kWs; 
     end
@@ -113,10 +96,10 @@ xlabel('Time Step')
 ylabel('Battery % Charge')
 
 figure(2)
-plot(iterations,Psignal)
+plot(iterations,Psignal,"b--")
 hold on
 plot(iterations,P_PS)
-plot(iterations,P_SS)
+plot(iterations,P_SS,":","LineWidth",1)
 yline(P_psOpt,"k:")
 yline(0,"k--")
 hold off
