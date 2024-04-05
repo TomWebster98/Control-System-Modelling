@@ -5,7 +5,6 @@
 %% Define ICE Parameters
 
 P_psMax = 170;  % kW
-P_psMin = 5;   % kW
 P_psOpt = 170;   % kW
 
 %% Define Battery/Motor Parameters
@@ -17,7 +16,7 @@ SOCl = 0.45;  % Lower SOC Limit
 
 SOC_initial = 0.5;
 
-GenCon_Efficiency = 0.4; % Ratio of generator output into battery charge
+GenCon_Efficiency = 0.6; % Ratio of generator output into battery charge
 
 % BatWght = 250; % kg
 % BatEnrgyDensity = 160; % Wh/kg
@@ -51,7 +50,8 @@ P_SS = zeros(1,length(Psignal));
 
 % Define charging/discharging rates
 
-timePerStep = 100; % seconds between each Psignal input val
+timePerStep = 60; % seconds between each Psignal input val
+engine_hold = 0;
 
 % Loop over Psignal and Calculate Power Split
 for i = 1:length(Psignal)
@@ -60,21 +60,30 @@ for i = 1:length(Psignal)
     elseif SOC(i) <= 0
         SOC(i) = 0;
     end
-    if SOC(i) <= SOCl
-        P_PS(i) = P_psOpt;
+
+    if engine_hold == 1
+        P_PS(i) = 0;
         P_SS(i) = Psignal(i);
+        if SOC(i) <= 0.8*SOCu
+            engine_hold = 0;
+        end
+    elseif SOC(i) <= SOCl
+        P_PS(i) = P_psOpt;
+        if Psignal(i) > 0.5*P_psOpt
+            P_SS(i) = 0.4*P_psOpt;
+        else 
+            P_SS(i) = Psignal(i);
+        end
     elseif SOC(i) > SOCl && SOC(i) < SOCu
         P_PS(i) = P_psOpt;
         P_SS(i) = Psignal(i);
-    elseif SOC(i) >= SOCu
+    elseif SOC(i) >= SOCu && engine_hold ~= 1
         P_PS(i) = 0;
         P_SS(i) = Psignal(i);
-    end    
-    if P_SS(i) - P_PS(i) <= 0
-        SOC(i+1) = SOC(i) + (-1*((P_SS(i)-P_PS(i)) * GenCon_Efficiency)*timePerStep)/BatCapacity_kWs;
-    else
-        SOC(i+1) = SOC(i) - (0.1*P_SS(i)*timePerStep)/BatCapacity_kWs; 
+        engine_hold = 1;
     end
+
+    SOC(i+1) = SOC(i) + (((P_PS(i) * GenCon_Efficiency) - P_SS(i))*timePerStep)/BatCapacity_kWs;
 
 end
 
@@ -99,7 +108,7 @@ figure(2)
 plot(iterations,Psignal,"b--")
 hold on
 plot(iterations,P_PS)
-plot(iterations,P_SS,":","LineWidth",1)
+plot(iterations,P_SS,"k:","LineWidth",1)
 yline(P_psOpt,"k:")
 yline(0,"k--")
 hold off
