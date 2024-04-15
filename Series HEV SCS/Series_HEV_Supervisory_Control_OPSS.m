@@ -4,23 +4,23 @@
 
 %% Define ICE Parameters
 
-P_psMax = 170;  % kW
-P_psOpt = 170;   % kW
+P_psMax = 100;  % kW
+P_psOpt = 100;   % kW
 
 %% Define Battery/Motor Parameters
 
-P_ssMax = 288; % kW
+P_ssMax = 300; % kW
 
 SOCu = 0.85;  % Upper SOC Limit
 SOCl = 0.45;  % Lower SOC Limit
 
-SOC_initial = 0.5;
+SOC_initial = 1;
 
-GenCon_Efficiency = 0.6; % Ratio of generator output into battery charge
+GenCon_Efficiency = 0.76; % Ratio of generator output into battery charge
 
 % BatWght = 250; % kg
 % BatEnrgyDensity = 160; % Wh/kg
-BatCapacity = 52000; %BatWght * BatEnrgyDensity; %Wh
+BatCapacity = 8900; %BatWght * BatEnrgyDensity; %Wh
 BatCapacity_kWs = (BatCapacity*60*60)/1000;      %kWs
 
 %% OPSS Control Strategy
@@ -50,7 +50,7 @@ P_SS = zeros(1,length(Psignal));
 
 % Define charging/discharging rates
 
-timePerStep = 60; % seconds between each Psignal input val
+timePerStep = 1; % seconds between each Psignal input val
 engine_hold = 0;
 
 % Loop over Psignal and Calculate Power Split
